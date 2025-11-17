@@ -11,6 +11,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Force dark mode
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.add('dark');
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

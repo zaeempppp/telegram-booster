@@ -33,28 +33,45 @@ const Order = () => {
     if (error) {
       toast.error("حدث خطأ في إرسال الطلب");
       console.error(error);
-    } else {
-      toast.success("تم إرسال طلبك بنجاح! سيتم مراجعته قريباً");
-      navigate("/");
+      setLoading(false);
+      return;
     }
 
+    // Send notification to Telegram
+    try {
+      await supabase.functions.invoke('notify-telegram', {
+        body: {
+          username: profile.username,
+          amount: parseInt(amount),
+          userId: profile.user_id,
+        },
+      });
+    } catch (telegramError) {
+      console.error('Failed to send Telegram notification:', telegramError);
+      // Don't block the order if Telegram fails
+    }
+
+    toast.success("تم إرسال طلبك بنجاح! سيتم مراجعته قريباً");
+    navigate("/");
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4" dir="rtl">
+    <div className="min-h-screen bg-background p-4" dir="rtl">
       <div className="container mx-auto max-w-2xl py-8">
-        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6 rounded-full">
           <ArrowRight className="h-4 w-4 ml-2" />
           العودة للرئيسية
         </Button>
 
-        <Card className="shadow-2xl">
+        <Card className="shadow-2xl border-2 bg-card/50 backdrop-blur">
           <CardHeader className="text-center">
-            <div className="mx-auto bg-primary rounded-2xl p-4 w-fit mb-4">
+            <div className="mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl p-5 w-fit mb-4 shadow-lg">
               <Send className="h-12 w-12 text-primary-foreground" />
             </div>
-            <CardTitle className="text-3xl font-bold">طلب رشق جديد</CardTitle>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              طلب رشق جديد
+            </CardTitle>
             <CardDescription>قم بإدخال عدد الرشق المطلوب وسيتم مراجعة طلبك</CardDescription>
           </CardHeader>
           <CardContent>
@@ -68,17 +85,17 @@ const Order = () => {
                   onChange={(e) => setAmount(e.target.value)}
                   required
                   min="1"
-                  className="text-right text-lg"
+                  className="text-right text-lg rounded-xl"
                 />
               </div>
 
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-muted/50 p-4 rounded-xl border">
                 <p className="text-sm text-muted-foreground text-center">
                   سيتم مراجعة طلبك من قبل الإدارة وتنفيذه في أقرب وقت ممكن
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+              <Button type="submit" className="w-full rounded-full shadow-lg" size="lg" disabled={loading}>
                 {loading ? "جاري الإرسال..." : "إرسال الطلب"}
               </Button>
             </form>

@@ -71,16 +71,18 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4" dir="rtl">
+    <div className="min-h-screen bg-background p-4" dir="rtl">
       <div className="container mx-auto py-8">
-        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6 rounded-full">
           <ArrowRight className="h-4 w-4 ml-2" />
           العودة للرئيسية
         </Button>
 
-        <Card className="shadow-2xl">
+        <Card className="shadow-2xl border-2 bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-3xl font-bold">لوحة تحكم الإدارة</CardTitle>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              لوحة تحكم الإدارة
+            </CardTitle>
             <CardDescription>إدارة طلبات الرشق</CardDescription>
           </CardHeader>
           <CardContent>
