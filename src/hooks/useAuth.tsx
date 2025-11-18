@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export const useAuth = () => {
@@ -8,7 +7,6 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<any>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -108,7 +106,6 @@ export const useAuth = () => {
   const signOut = async () => {
     await supabase.auth.signOut();
     toast.success("تم تسجيل الخروج");
-    navigate("/auth");
   };
 
   return {
