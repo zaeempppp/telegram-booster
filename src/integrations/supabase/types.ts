@@ -65,6 +65,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          service_type: string
           status: string
           updated_at: string
           user_id: string
@@ -74,6 +75,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          service_type?: string
           status?: string
           updated_at?: string
           user_id: string
@@ -83,6 +85,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          service_type?: string
           status?: string
           updated_at?: string
           user_id?: string
@@ -158,6 +161,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      count_user_pending_orders: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
