@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, Shield, User, Sparkles, ArrowRight, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -212,8 +213,37 @@ const HomePage = ({ onNavigate, isAdmin }: { onNavigate: (page: 'auth' | 'home' 
 // Order Page Component
 const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order' | 'admin') => void }) => {
   const [amount, setAmount] = useState("");
+  const [serviceType, setServiceType] = useState("members");
   const [loading, setLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+  const [canOrder, setCanOrder] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const { profile } = useAuth();
+
+  useEffect(() => {
+    checkOrderLimit();
+  }, [profile]);
+
+  const checkOrderLimit = async () => {
+    if (!profile) return;
+    
+    setIsChecking(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('count_user_pending_orders', { p_user_id: profile.id });
+      
+      if (error) throw error;
+      
+      const count = data || 0;
+      setPendingCount(count);
+      setCanOrder(count < 3);
+    } catch (error) {
+      console.error('Error checking order limit:', error);
+      toast.error('حدث خطأ في التحقق من عدد الطلبات');
+    } finally {
+      setIsChecking(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,11 +253,17 @@ const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
       return;
     }
 
+    if (!canOrder) {
+      toast.error("لقد وصلت للحد الأقصى من الطلبات (3 طلبات)");
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.from("rush_orders").insert({
       user_id: profile.id,
       amount: parseInt(amount),
+      service_type: serviceType,
       status: "pending",
     });
 
@@ -244,6 +280,7 @@ const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
         body: {
           username: profile.username,
           amount: parseInt(amount),
+          serviceType: serviceType,
           userId: profile.user_id,
         },
       });
@@ -254,7 +291,29 @@ const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
     toast.success("تم إرسال طلبك بنجاح! سيتم مراجعته قريباً");
     onNavigate('home');
     setLoading(false);
+    checkOrderLimit();
   };
+
+  const getServiceLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      members: "رشق أعضاء",
+      engagement: "رشق تفاعل",
+      views: "رشق مشاهدات",
+      likes: "رشق لايكات"
+    };
+    return labels[type] || type;
+  };
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">جاري التحقق من الطلبات...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4" dir="rtl">
@@ -272,33 +331,70 @@ const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               طلب رشق جديد
             </CardTitle>
-            <CardDescription>قم بإدخال عدد الرشق المطلوب وسيتم مراجعة طلبك</CardDescription>
+            <CardDescription>
+              {canOrder 
+                ? `يمكنك تقديم ${3 - pendingCount} طلب${3 - pendingCount === 1 ? '' : 'ات'} إضافي${3 - pendingCount === 1 ? '' : 'ة'}`
+                : "وصلت للحد الأقصى من الطلبات (3 طلبات)"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">عدد الرشق المطلوب</label>
-                <Input
-                  type="number"
-                  placeholder="مثال: 1000"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  min="1"
-                  className="text-right text-lg rounded-xl"
-                />
-              </div>
-
-              <div className="bg-muted/50 p-4 rounded-xl border">
-                <p className="text-sm text-muted-foreground text-center">
-                  سيتم مراجعة طلبك من قبل الإدارة وتنفيذه في أقرب وقت ممكن
+            {!canOrder ? (
+              <div className="text-center py-8">
+                <div className="mx-auto bg-destructive/10 rounded-full p-6 w-20 h-20 flex items-center justify-center mb-4">
+                  <X className="h-10 w-10 text-destructive" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">تم الوصول للحد الأقصى</h3>
+                <p className="text-muted-foreground mb-4">
+                  لديك حالياً {pendingCount} طلبات معلقة أو مقبولة
                 </p>
+                <p className="text-sm text-muted-foreground">
+                  يرجى انتظار اكتمال الطلبات الحالية قبل تقديم طلب جديد
+                </p>
+                <Button onClick={() => onNavigate('home')} className="mt-6 rounded-full" variant="outline">
+                  العودة للصفحة الرئيسية
+                </Button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">نوع الخدمة</label>
+                  <Select value={serviceType} onValueChange={setServiceType}>
+                    <SelectTrigger className="w-full rounded-xl text-right">
+                      <SelectValue placeholder="اختر نوع الخدمة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="members">رشق أعضاء</SelectItem>
+                      <SelectItem value="engagement">رشق تفاعل</SelectItem>
+                      <SelectItem value="views">رشق مشاهدات</SelectItem>
+                      <SelectItem value="likes">رشق لايكات</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <Button type="submit" className="w-full rounded-full shadow-lg" size="lg" disabled={loading}>
-                {loading ? "جاري الإرسال..." : "إرسال الطلب"}
-              </Button>
-            </form>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">الكمية المطلوبة</label>
+                  <Input
+                    type="number"
+                    placeholder="أدخل الكمية المطلوبة"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    required
+                    min="1"
+                    className="text-right text-lg rounded-xl"
+                  />
+                </div>
+
+                <div className="bg-muted/50 p-4 rounded-xl border">
+                  <p className="text-sm text-muted-foreground text-center">
+                    سيتم مراجعة طلبك من قبل الإدارة وتنفيذه في أقرب وقت ممكن
+                  </p>
+                </div>
+
+                <Button type="submit" className="w-full rounded-full shadow-lg" size="lg" disabled={loading}>
+                  {loading ? "جاري الإرسال..." : "إرسال الطلب"}
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -353,6 +449,16 @@ const AdminPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
     }
   };
 
+  const getServiceLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      members: "رشق أعضاء",
+      engagement: "رشق تفاعل",
+      views: "رشق مشاهدات",
+      likes: "رشق لايكات"
+    };
+    return labels[type] || type;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -385,6 +491,7 @@ const AdminPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-right">المستخدم</TableHead>
+                      <TableHead className="text-right">نوع الخدمة</TableHead>
                       <TableHead className="text-right">العدد</TableHead>
                       <TableHead className="text-right">الحالة</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
@@ -398,6 +505,7 @@ const AdminPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
                         <TableCell className="font-medium">
                           {order.profiles?.username || "غير معروف"}
                         </TableCell>
+                        <TableCell>{getServiceLabel(order.service_type)}</TableCell>
                         <TableCell>{order.amount.toLocaleString()}</TableCell>
                         <TableCell>
                           <Badge
