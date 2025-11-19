@@ -42,22 +42,22 @@ const AuthPage = ({ onSuccess }: { onSuccess: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
-      <Card className="w-full max-w-md shadow-2xl border-2 bg-card/50 backdrop-blur">
-        <CardHeader className="text-center">
-          <div className="mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl p-5 w-20 h-20 flex items-center justify-center mb-4 shadow-lg">
-            <Sparkles className="h-10 w-10 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4" dir="rtl">
+      <Card className="w-full max-w-md shadow-2xl border-2 border-primary/20 bg-card/80 backdrop-blur-xl">
+        <CardHeader className="text-center space-y-4">
+          <div className="mx-auto bg-gradient-to-br from-primary via-primary to-accent rounded-3xl p-6 w-24 h-24 flex items-center justify-center mb-2 shadow-2xl shadow-primary/20 animate-pulse">
+            <Sparkles className="h-12 w-12 text-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-fade-in">
             رشق تليجرام
           </CardTitle>
-          <CardDescription>منصة إدارة طلبات الرشق</CardDescription>
+          <CardDescription className="text-base">منصة إدارة طلبات الرشق الاحترافية</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 rounded-xl">
-              <TabsTrigger value="signin" className="rounded-lg">تسجيل الدخول</TabsTrigger>
-              <TabsTrigger value="signup" className="rounded-lg">حساب جديد</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 rounded-xl p-1 bg-muted/50">
+              <TabsTrigger value="signin" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground">تسجيل الدخول</TabsTrigger>
+              <TabsTrigger value="signup" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-primary-foreground">حساب جديد</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4 mt-4">
@@ -83,7 +83,8 @@ const AuthPage = ({ onSuccess }: { onSuccess: () => void }) => {
                     className="rounded-xl text-right"
                   />
                 </div>
-                <Button type="submit" className="w-full rounded-full shadow-lg" size="lg">
+                <Button type="submit" className="w-full rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all bg-gradient-to-r from-primary to-accent" size="lg">
+                  <ArrowRight className="ml-2 h-5 w-5" />
                   تسجيل الدخول
                 </Button>
               </form>
@@ -123,7 +124,8 @@ const AuthPage = ({ onSuccess }: { onSuccess: () => void }) => {
                     className="rounded-xl text-right"
                   />
                 </div>
-                <Button type="submit" className="w-full rounded-full shadow-lg" size="lg">
+                <Button type="submit" className="w-full rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all bg-gradient-to-r from-primary to-accent" size="lg">
+                  <Sparkles className="ml-2 h-5 w-5" />
                   إنشاء حساب
                 </Button>
               </form>
@@ -316,17 +318,17 @@ const OrderPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
   }
 
   return (
-    <div className="min-h-screen bg-background p-4" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4" dir="rtl">
       <div className="container mx-auto max-w-2xl py-8">
-        <Button variant="ghost" onClick={() => onNavigate('home')} className="mb-6 rounded-full">
+        <Button variant="ghost" onClick={() => onNavigate('home')} className="mb-6 rounded-full hover:bg-primary/10 transition-all">
           <ArrowRight className="h-4 w-4 ml-2" />
           العودة للرئيسية
         </Button>
 
-        <Card className="shadow-2xl border-2 bg-card/50 backdrop-blur">
-          <CardHeader className="text-center">
-            <div className="mx-auto bg-gradient-to-br from-primary to-accent rounded-2xl p-5 w-fit mb-4 shadow-lg">
-              <Send className="h-12 w-12 text-primary-foreground" />
+        <Card className="shadow-2xl border-2 border-primary/20 bg-card/80 backdrop-blur-xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto bg-gradient-to-br from-primary via-primary to-accent rounded-3xl p-6 w-fit mb-2 shadow-2xl shadow-primary/20 animate-pulse">
+              <Send className="h-14 w-14 text-primary-foreground" />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               طلب رشق جديد
@@ -468,19 +470,26 @@ const AdminPage = ({ onNavigate }: { onNavigate: (page: 'auth' | 'home' | 'order
   }
 
   return (
-    <div className="min-h-screen bg-background p-4" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-4" dir="rtl">
       <div className="container mx-auto py-8">
-        <Button variant="ghost" onClick={() => onNavigate('home')} className="mb-6 rounded-full">
+        <Button variant="ghost" onClick={() => onNavigate('home')} className="mb-6 rounded-full hover:bg-primary/10 transition-all">
           <ArrowRight className="h-4 w-4 ml-2" />
           العودة للرئيسية
         </Button>
 
-        <Card className="shadow-2xl border-2 bg-card/50 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              لوحة تحكم الإدارة
-            </CardTitle>
-            <CardDescription>إدارة طلبات الرشق</CardDescription>
+        <Card className="shadow-2xl border-2 border-primary/20 bg-card/80 backdrop-blur-xl">
+          <CardHeader className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-t-xl space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-br from-primary to-accent rounded-2xl p-4 shadow-lg animate-pulse">
+                <Shield className="h-8 w-8 text-primary-foreground" />
+              </div>
+              <div>
+                <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                  لوحة تحكم الإدارة
+                </CardTitle>
+                <CardDescription className="text-base">إدارة ومراجعة جميع طلبات الرشق</CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {orders.length === 0 ? (

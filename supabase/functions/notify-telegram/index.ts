@@ -14,15 +14,29 @@ serve(async (req) => {
   }
 
   try {
-    const { username, amount, userId } = await req.json();
+    const { username, amount, userId, serviceType } = await req.json();
+
+    const serviceTypeArabic: Record<string, string> = {
+      'members': '👥 أعضاء',
+      'engagement': '💬 تفاعل',
+      'views': '👁️ مشاهدات',
+      'likes': '❤️ إعجابات'
+    };
 
     const message = `
-🆕 طلب رشق جديد!
+╔══════════════════════╗
+   🆕 طلب رشق جديد
+╚══════════════════════╝
 
-👤 المستخدم: ${username}
-🔢 العدد: ${amount.toLocaleString('ar')}
-🆔 User ID: ${userId}
+👤 اسم المستخدم: ${username}
+🆔 معرف المستخدم: ${userId}
 
+📦 نوع الخدمة: ${serviceTypeArabic[serviceType] || serviceType}
+🔢 الكمية المطلوبة: ${amount.toLocaleString('ar')}
+
+⏰ وقت الطلب: ${new Date().toLocaleString('ar-EG', { timeZone: 'Africa/Cairo' })}
+
+━━━━━━━━━━━━━━━━━━━━
 @O_D_E_0
     `;
 
